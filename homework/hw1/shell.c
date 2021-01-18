@@ -250,9 +250,13 @@ void init_shell() {
   shell_is_interactive = isatty(shell_terminal);
 
   if(shell_is_interactive){
-    /* Force the shell into foreground */
-    while(tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp()))
+
+    //FIXME // the shell process not brought to the foreground,\
+    although the ctrl-C signal was successfully received
+    // Force the shell into foreground
+    while(tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())){
       kill(-shell_pgid, SIGTTIN);
+    }
 
     /* Ignore interactive and job-control signals */
     signal(SIGINT, SIG_IGN);
@@ -263,7 +267,7 @@ void init_shell() {
     //signal(SIGCHLD, SIG_IGN);
 
     /* Saves the shell's process id */
-    shell_pgid = getpid();
+    //shell_pgid = getpid();
 
     /* Put shell in its own process group */
     if (setpgid(shell_pgid, shell_pgid) < 0) {
@@ -272,7 +276,7 @@ void init_shell() {
     }
 
     /* Take control of the terminal */
-    tcsetpgrp(shell_terminal, shell_pgid);
+    //tcsetpgrp(shell_terminal, shell_pgid);
     tcgetattr(shell_terminal, &shell_tmodes);
   }
 }
@@ -293,6 +297,7 @@ int shell(int argc, char *argv[]) {
 
   init_shell();
 
+  //TODO
   if (shell_is_interactive) {
     getcwd(cwd_buf, PATH_MAX);
     /* Please only print shell prompts when standard input is not a tty */
