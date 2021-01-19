@@ -250,10 +250,6 @@ void init_shell() {
   shell_is_interactive = isatty(shell_terminal);
 
   if(shell_is_interactive){
-
-    //FIXME // the shell process not brought to the foreground,\
-    although the ctrl-C signal was successfully received
-    // Force the shell into foreground
     while(tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())){
       kill(-shell_pgid, SIGTTIN);
     }
@@ -266,6 +262,7 @@ void init_shell() {
     signal(SIGTTOU, SIG_IGN);
     //signal(SIGCHLD, SIG_IGN);
 
+    // FIXME unuseful code
     /* Saves the shell's process id */
     //shell_pgid = getpid();
 
