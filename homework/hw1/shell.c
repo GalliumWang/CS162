@@ -296,18 +296,25 @@ int shell(int argc, char *argv[]) {
   while ((input_bytes = freadln(stdin))) {
     tokens = get_toks(input_bytes);
     tokens_length = toks_length(tokens);
-    
+
+    // printf("%d",tokens_length);
+    // printf("\n");
+
     int bg = 0;
     if (strcmp(tokens[tokens_length - 1], "&") == 0) {
       bg = 1;
-      free(tokens[tokens_length - 1]);
+      //free(tokens[tokens_length - 1]);  FIXME
       tokens[tokens_length - 1] = NULL;
     }
 
     fundex = lookup(tokens[0]);
+
+
     if (fundex >= 0) {
-      cmd_table[fundex].fun(&tokens[1]);
-    } else {
+      cmd_table[fundex].fun(&tokens[1]); //FIXME
+    } // for built
+    else {
+      // TODO
       /* REPLACE this to run commands as programs. */
       pid_t pid = fork();
       if (pid == 0) {
@@ -321,7 +328,8 @@ int shell(int argc, char *argv[]) {
           fprintf(stderr, "%s : Command not found\n", tokens[0]);
           exit(0);
         }
-      } else {
+      } 
+      else {
         if (!bg) {
           int child_status;
           if (waitpid(pid, &child_status, 0) < 0) {
@@ -335,11 +343,10 @@ int shell(int argc, char *argv[]) {
     free_toks(tokens);
     free(input_bytes);
 
-    if (shell_is_interactive) {
-      getcwd(cwd_buf, PATH_MAX);
-      /* Please only print shell prompts when standard input is not a tty */
-      fprintf(stdout, "\033[;34mrayn\33[0m [\033[;32m%s\33[0m] \033[;31m%s\33[0m > ", get_current_time(), cwd_buf);
-    }
+
+    getcwd(cwd_buf, PATH_MAX);
+    fprintf(stdout, "\033[;34mGalliumBash\33[0m [\033[;32m%s\33[0m] \033[;31m%s\33[0m > ", get_current_time(), cwd_buf);
+  
   }
   free(path);
   free_toks(path_tokens);

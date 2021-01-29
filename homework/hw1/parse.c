@@ -32,6 +32,7 @@ tok_t *get_toks(char *line) {
   return toks;
 }
 
+//FIXME memory leak
 /**
  * Frees the memory of the token array toks.
  * Please call if and only if toks will not be used in the future.
