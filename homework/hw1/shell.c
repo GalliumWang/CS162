@@ -281,25 +281,29 @@ int shell(int argc, char *argv[]) {
   strncpy(path, getenv("PATH"), PATH_MAX);
   path_tokens = get_toks(path);
 
-
   init_shell();
 
-  //TODO
-  if (shell_is_interactive) {
-    getcwd(cwd_buf, PATH_MAX);
-    /* Please only print shell prompts when standard input is not a tty */
-    fprintf(stdout, "\033[;34mrayn\33[0m [\033[;32m%s\33[0m] \033[;31m%s\33[0m > ", get_current_time(), cwd_buf);
-  }
+  getcwd(cwd_buf, PATH_MAX);
+  
+  // with color ctrl
+  system("clear");
+  fprintf(stdout, "\033[1J\033[;34mGalliumBash\33[0m [\033[;32m%s\33[0m] \033[;31m%s\33[0m > ",
+                   get_current_time(), cwd_buf);
+
+
+
 
   while ((input_bytes = freadln(stdin))) {
     tokens = get_toks(input_bytes);
     tokens_length = toks_length(tokens);
+    
     int bg = 0;
     if (strcmp(tokens[tokens_length - 1], "&") == 0) {
       bg = 1;
       free(tokens[tokens_length - 1]);
       tokens[tokens_length - 1] = NULL;
     }
+
     fundex = lookup(tokens[0]);
     if (fundex >= 0) {
       cmd_table[fundex].fun(&tokens[1]);
