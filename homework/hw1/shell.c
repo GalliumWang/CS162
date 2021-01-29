@@ -262,16 +262,6 @@ void init_shell() {
     signal(SIGTTOU, SIG_IGN);
     //signal(SIGCHLD, SIG_IGN);
 
-    // FIXME unuseful code
-    /* Saves the shell's process id */
-    //shell_pgid = getpid();
-
-    /* Put shell in its own process group */
-    if (setpgid(shell_pgid, shell_pgid) < 0) {
-      fprintf(stderr, "Couldn’t put the shell in its own process group");
-      exit(1);
-    }
-
     /* Take control of the terminal */
     //tcsetpgrp(shell_terminal, shell_pgid);
     tcgetattr(shell_terminal, &shell_tmodes);
