@@ -142,6 +142,7 @@ char* get_current_time() {
  * Find execuatable file from PATH.
  */
 char* find_file_from_path(char* filename, tok_t path_tokens[]) {
+
   char* ret = (char*) malloc(PATH_MAX + MAXLINE + 2);
   struct dirent* ent;
   for (int i = 1; i < MAXTOKS && path_tokens[i]; ++i) {
@@ -160,6 +161,7 @@ char* find_file_from_path(char* filename, tok_t path_tokens[]) {
   }
   free(ret);
   return NULL;
+  
 }
 
 /**
@@ -169,7 +171,10 @@ int io_redirect(tok_t arg[]) {
   int i, fd;
   int in_redir = is_direct_tok(arg, "<");
   int out_redir = is_direct_tok(arg, ">");
+
   if (in_redir != 0) {
+
+    // Syntax error
     if (arg[in_redir + 1] == NULL ||
         strcmp(arg[in_redir + 1], ">") == 0 ||
         strcmp(arg[in_redir + 1], "<") == 0)
@@ -177,17 +182,21 @@ int io_redirect(tok_t arg[]) {
       fprintf(stderr, "%s : Syntax error.\n", arg[0]);
       return -1;
     }
+
     if ((fd = open(arg[in_redir + 1], O_RDONLY, 0)) < 0) {
       fprintf(stderr, "%s : No such file or directory.\n", arg[in_redir + 1]);
       return -1;
-    }
+    } //error in redirecting
+
     dup2(fd, STDIN_FILENO);
     for (i = in_redir; i < MAXTOKS - 2 && arg[i + 2]; ++i) {
       free(arg[i]);
       arg[i] = arg[i + 2];
-    }
+    } //FIXME
     arg[i] = NULL;
   }
+
+  //FIXME same as above
   if (out_redir != 0) {
     if (arg[out_redir + 1] == NULL ||
         strcmp(arg[out_redir + 1], ">") == 0 ||
@@ -208,6 +217,7 @@ int io_redirect(tok_t arg[]) {
     arg[i] = NULL;
   }
   return 0;
+
 }
 
 /**
@@ -314,22 +324,35 @@ int shell(int argc, char *argv[]) {
       cmd_table[fundex].fun(&tokens[1]); //FIXME
     } // for built
     else {
-      // TODO
-      /* REPLACE this to run commands as programs. */
+
       pid_t pid = fork();
+
+
       if (pid == 0) {
+        //child process
         if (io_redirect(tokens) < 0) {
           exit(0);
         }
+
         path_resolve(tokens, path_tokens);
-        undo_signal();
+
+        // FIXME do not do this if it's a bg process
+        if(!bg){
+        undo_signal();  //just effect child process
+        }
+
+        // FIXME
+        //close stdin or the shell will crash
+        //it's impossible to switch to stdin when return to fg
 
         if (execv(tokens[0], tokens) < 0) {
           fprintf(stderr, "%s : Command not found\n", tokens[0]);
           exit(0);
         }
-      } 
+
+      }
       else {
+        //parent process
         if (!bg) {
           int child_status;
           if (waitpid(pid, &child_status, 0) < 0) {
@@ -339,6 +362,8 @@ int shell(int argc, char *argv[]) {
           printf("[%d] : %s\n", pid, input_bytes);
         }
       }
+
+
     }
     free_toks(tokens);
     free(input_bytes);
